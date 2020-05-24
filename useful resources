@@ -1,7 +1,14 @@
-https://www.design-reuse.com/articles/33005/understanding-latency-in-video-compression-systems.html
+- Discussing the sources of latency in video streams and decoder buffer sizes
+	https://www.design-reuse.com/articles/33005/understanding-latency-in-video-compression-systems.html
 
-https://streaminglearningcenter.com/blogs/book-excerpt-vbv-buffer-explained.html
+- Example report topics/data
+	https://streaminglearningcenter.com/blogs/book-excerpt-vbv-buffer-explained.html
 
-https://learn.akamai.com/en-us/webhelp/media-services-on-demand/media-services-on-demand-encoder-best-practices/GUID-1130A085-0155-4AE2-9AAC-FE0B0FAC6FAD.html
+- Encoder Buffer Definition
+	https://learn.akamai.com/en-us/webhelp/media-services-on-demand/media-services-on-demand-encoder-best-practices/GUID-1130A085-0155-4AE2-9AAC-FE0B0FAC6FAD.html
 
-https://docs.microsoft.com/en-us/windows/win32/medfound/the-leaky-bucket-buffer-model
+- Model to represent buffer
+	https://docs.microsoft.com/en-us/windows/win32/medfound/the-leaky-bucket-buffer-model
+
+- Mathematical definitions/models for a streaming system
+	https://www.cambridge.org/core/services/aop-cambridge-core/content/view/EDABAF891882B0F396B456FAF24FA9E7/S204877031500013Xa.pdf/mathematical_theory_of_compressed_video_buffering_traffic_regulation_for_endtoend_video_network_qos.pdf
