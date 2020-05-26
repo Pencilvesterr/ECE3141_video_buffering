@@ -9,13 +9,13 @@ delta_t = 1 / fps;
 mean_bit_rate = (sum(encoded_data)/video_time)/1e3;  % (KB/s)
 
 %% Model Settings
-transmission_rate = 40000;  %(KB/s)
-max_buffer_size = 320000;  % (bytes)
+transmission_rate = 100*1e3;  %(bytes/s)
+max_buffer_size = 2000*1e3 ;  % (Bytes)
 
 % Data in encoder at each time step
 encoder_buffer = zeros(1, frames);  
 decoder_buffer = zeros(1, frames);
-dec_min_buffering = max_buffer_size;
+dec_min_buffering = max_buffer_size * 3/4;
 
 %% Simulation
 time_step = 1;
@@ -75,7 +75,7 @@ while ~transmission_compteled
         if decoder_buffer(time_step) < framedata_to_decode 
             % Buffer underflow. Finish.
             transmission_compteled = true;
-            disp("Buffer Underflow at " + time_step);
+            disp("Buffer Underflow: " + time_step / fps);
             break
         else
             decoder_buffer(time_step) = decoder_buffer(time_step) - framedata_to_decode;
@@ -93,7 +93,8 @@ end
 
 
 elapsed_time = (time_step-1) * delta_t;  %(s)
-time = 0:delta_t:length(decoder_buffer);
+
+
 
 % Standardize all vectors to have 0 values for any other times
 initial_buffering_time = zeros(1,time_start_decoding);
@@ -101,12 +102,14 @@ decoder_buffer = [initial_buffering_time decoder_buffer];
 additional_decoding_time = zeros(1, length(decoder_buffer)-length(encoder_buffer));
 encoder_buffer = [encoder_buffer additional_decoding_time];
 
+disp("Buffering time: " + length(additional_decoding_time)/ fps)
 
+time_x = 0:delta_t:((length(encoder_buffer)-1)*delta_t);
 %% Plot Results
-;subplot(2,1,1)
-plot(time,encoder_buffer), ylabel('Data in Enc Buffer (Bytes)');
+subplot(2,1,1)
+plot(time_x,encoder_buffer./1e3), ylabel('Data in Enc Buffer (KB)');
 subplot(2,1,2)
-plot(time,decoder_buffer),xlabel('Time (s)'),ylabel('Data in Dec Buffer (Bytes)')
+plot(time_x,decoder_buffer./1e3),xlabel('Time (s)'),ylabel('Data in Dec Buffer (KB)')
 
 
 for i = 1:2
