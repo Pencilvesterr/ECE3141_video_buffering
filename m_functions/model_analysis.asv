@@ -8,7 +8,7 @@ encoded_data = importdata('../data/jarrasic_park_encoded_mp4_low.txt')';
 buffer_time = zeros(100);
 max_buffer = zeros(100);
 
-
+start = 
 
 for trans_rate = 1000: 1000: 100000
     for min_buffer =  1000: 1000: 100000
@@ -29,24 +29,11 @@ end
 % title('Transmission rate (KB): 80') 
 
 %% 3D Plot 
-figure
 [X,Y] = meshgrid(1:100);
 Z = buffer_time;
 mesh(X, Y, Z);
-
 xlabel('Transmission Rate (KB)')
-ylabel('Buffer Size Begin Playback (KB)')
-zlabel('Buffering Time (s)')
-
-figure
-[X,Y] = meshgrid(1:100);
-Z = max_buffer/1e3;
-mesh(X, Y, Z);
-
-xlabel('Transmission Rate (KB)')
-ylabel('Buffer Size Begin Playback (KB)')
-zlabel('Max Data in Decoder Buffer (KB)')
-
+ylabel('
 
 if success
     disp("Successfully complete")

@@ -1,4 +1,4 @@
-function [success, buffering_time] = simulate_buffer(encoded_data, transmission_rate, max_buffer_size, plt)
+function [success, buffering_time, max_buffer_size] = simulate_buffer(encoded_data, transmission_rate, dec_min_buffer, plt)
 % SIMULATE_BUFFER Model a buffer with encoded frame datat. Returns buffering time.
 % Written by Morgan Crouch
 % Inputs
@@ -9,6 +9,7 @@ function [success, buffering_time] = simulate_buffer(encoded_data, transmission_
 % Outputs
 %   success           Boolean of if model ran without under/overflowing
 %   buffering_time    Time in seconds required to buffer
+%   max_buffer_size   Max data the buffer help (bytes)
 
 %% Encoded data values
 video_time = 3600; % (s)
@@ -21,8 +22,8 @@ mean_bit_rate = (sum(encoded_data)/video_time)/1e3;  % (KB/s)
 % Data in encoder at each time step
 encoder_buffer = zeros(1, frames);  
 decoder_buffer = zeros(1, frames);
-% Waits for buffer to fill 75% until begin processing
-dec_min_buffering = max_buffer_size * 3/4;
+% TODO: Implement max buffer size
+
 
 %% Model Simulation
 % Each discrete time step is a single frame being processed
@@ -72,8 +73,9 @@ while ~transmission_compteled
     if init_dec_buffer_complete
         % Check if remaining frames to decode
         if time_step-time_start_decoding > length(encoded_data)
+            % Complete success
             transmission_compteled = true;
-            disp("All frames successfully transmitted")
+            
             continue
         end
             
@@ -81,7 +83,6 @@ while ~transmission_compteled
         if decoder_buffer(time_step) < framedata_to_decode 
             % Buffer underflow. Finish.
             transmission_compteled = true;
-            disp("Buffer Underflow: " + time_step / fps);
             continue
         else
             decoder_buffer(time_step) = decoder_buffer(time_step) - framedata_to_decode;
@@ -89,7 +90,7 @@ while ~transmission_compteled
     end
     
     % Check if min buffer size is reached to start playback
-    if ~init_dec_buffer_complete && decoder_buffer(time_step) > dec_min_buffering
+    if ~init_dec_buffer_complete && decoder_buffer(time_step) > dec_min_buffer
         init_dec_buffer_complete = true;
         time_start_decoding = time_step;
     end
@@ -102,22 +103,21 @@ if frames == time_step - time_start_decoding -1
 else
     success = false;
 end
-
+%% Plot Results
 % Standardize all vectors to have 0 values for any other times
 initial_buffering_time = zeros(1,time_start_decoding);
 decoder_buffer = [initial_buffering_time decoder_buffer];
+
 additional_decoding_time = zeros(1, length(decoder_buffer)-length(encoder_buffer));
 encoder_buffer = [encoder_buffer additional_decoding_time];
-
 buffering_time = length(additional_decoding_time)/fps;
-disp("Buffering time: " + buffering_time)
 
 time_x = 0:delta_t:((length(encoder_buffer)-1)*delta_t);
-
-%% Plot Results
 if plt
     subplot(2,1,1)
     plot(time_x,encoder_buffer./1e3), ylabel('Data in Enc Buffer (KB)');
     subplot(2,1,2)
     plot(time_x,decoder_buffer./1e3),xlabel('Time (s)'),ylabel('Data in Dec Buffer (KB)')
 end
+
+max_buffer_size = max(decoder_buffer);
