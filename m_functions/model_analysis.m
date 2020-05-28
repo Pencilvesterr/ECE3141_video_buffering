@@ -32,8 +32,8 @@ for trans_rate = trans_rate_vec
 end
 
 %% Print single 2D Plot
-plot_tans_rate = 800e3;
-plot_min_buffer = 8e3;
+plot_tans_rate = 70e3;
+plot_min_buffer = 40e3;
 [success, buffering_time, max_buffer_size] = simulate_buffer(encoded_data, plot_tans_rate, plot_min_buffer, true, true);
 
 %% 3D Plot 
