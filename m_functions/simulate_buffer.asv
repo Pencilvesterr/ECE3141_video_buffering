@@ -1,4 +1,4 @@
-function [success, buffering_time, max_buffer_size] = simulate_buffer(encoded_data, transmission_rate, dec_min_buffer, plt, print)
+function [success, buffering_time, max_buffer_size] = simulate_buffer(encoded_data, transmission_rate, std_deviation, dec_min_buffer, plt, print)
 % SIMULATE_BUFFER Model a buffer with encoded frame datat. Returns buffering time.
 % Written by Morgan Crouch
 % Inputs
@@ -18,12 +18,12 @@ fps = frames/video_time;  % 25 fps mp4
 delta_t = 1 / fps;
 mean_bit_rate = (sum(encoded_data)/video_time)/1e3;  % (KB/s)
 
+
 %% Model Simulation
 % Each discrete time step is a single frame being processed
 encoder_buffer = zeros(1, frames);  
 decoder_buffer = zeros(1, frames);
 time_step = 1;
-max_transmit = floor(transmission_rate * delta_t);  % (bytes / frame timestep)
 
 time_start_decoding = 1;
 init_dec_buffer_complete = false;
@@ -31,6 +31,12 @@ transmission_compteled = false;
 % TODO: What do when encoder buffer overflow?
 while ~transmission_compteled
     %% Update data in encoder buffer
+    % Transmission rate can be constant or chosen rnd from distribution
+    % If std_deviation = 0, will be const transmission rate
+ 
+    transmission_rate = std_deviation
+    max_transmit = floor(transmission_rate * delta_t);  % (bytes / frame timestep)
+    
     % First frame, add to buffer but can't simultaneously transmit
     if time_step == 1
         encoder_buffer(time_step) = encoded_data(time_step);
@@ -125,7 +131,8 @@ if print
     
     disp('Max Buffer Size: ')
     disp(max_buffer_size)
-    disp('Buffering Time: ' + buffering_time)
+    disp('Buffering Time: ')
+    disp(buffering_time)
 end
 
 

@@ -1,29 +1,42 @@
 clc; clear all; close all;
-
-transmission_rate = 100*1e3;  %(bytes/s)
-dec_min_buffer = 2000*1e3 ;  % (Bytes)
-encoded_data = importdata('../data/jarrasic_park_encoded_mp4_low.txt')';
-
 %% Parameters for model
-% All values in Bytes
-step_size = 1000;
-trans_min = 30000; 
-trans_max = 75000;
-min_buffer_min = 1000;
-min_buffer_max = 150000;
+% High Quality File
+% All values in Bytes (Uncomment below for use)
+encoded_data = importdata('../data/jurassic_park_encoded_mp4_high.txt')';
+trans_step_size = 5e3;
+trans_min = 100e3; 
+trans_max = 250e3;
+% Set value to 0 for constant transmission rate
 
+
+min_buffer_step_size = 20e3;
+min_buffer_min = 1e3;
+min_buffer_max = 2000e3;
+
+% Low Quality File 
+% All values in Bytes (Uncomment below for use)
+% encoded_data = importdata('../data/jurrasic_park_encoded_mp4_low.txt')';
+% trans_step_size = 10e3;
+% trans_min = 10e3; 
+% trans_max = 300e3;
+% 
+% min_buffer_step_size = 10e3;
+% min_buffer_min = 100e3;
+% min_buffer_max = 2000e3;
+
+%% Running the model
 % Creating vector based on model parameters
-trans_rate_vec = trans_min: step_size: trans_max;
-min_buffer_vec = min_buffer_min: step_size: min_buffer_max;
+trans_rate_vec = trans_min: trans_step_size: trans_max;
+min_buffer_vec = min_buffer_min: min_buffer_step_size: min_buffer_max;
 buffer_times = zeros(length(trans_rate_vec), (length(min_buffer_vec)));
 max_buffers = zeros(length(trans_rate_vec), (length(min_buffer_vec)));
 
-% Running the model
-for trans_rate = trans_rate_vec
-    trans_i = (trans_rate - trans_min) / step_size + 1;
+for avg_trans_rate = trans_rate_vec
+    trans_i = (avg_trans_rate - trans_min) / trans_step_size + 1;
     for min_buffer = min_buffer_vec
-        min_buff_j = (min_buffer - min_buffer_min )/ step_size + 1;
-        [success, buffering_time, max_buffer_size] = simulate_buffer(encoded_data, trans_rate, min_buffer, false, false);
+        min_buff_j = (min_buffer - min_buffer_min )/ min_buffer_step_size + 1;
+        trans_std_dev = avg_trans_rate/3;
+        [success, buffering_time, max_buffer_size] = simulate_buffer(encoded_data, avg_trans_rate, trans_std_dev, min_buffer, false, false);
         if success
             buffer_times(trans_i, min_buff_j) = buffering_time;
             max_buffers(trans_i, min_buff_j) = max_buffer_size;
@@ -31,27 +44,40 @@ for trans_rate = trans_rate_vec
     end
 end
 
-%% Print single 2D Plot
-plot_tans_rate = 70e3;
-plot_min_buffer = 40e3;
-[success, buffering_time, max_buffer_size] = simulate_buffer(encoded_data, plot_tans_rate, plot_min_buffer, true, true);
+%% Plotting graphs
+% Print single 2D Plot
+% High Quality
+plot_tans_rate = 200e3;
+plot_min_buffer = 500e3;
+% Low Quality
+% plot_tans_rate = 70e3;
+% plot_min_buffer = 40e3;
+[success, buffering_time, max_buffer_size] = ...
+    simulate_buffer(encoded_data, plot_tans_rate, trans_std_dev, plot_min_buffer, true, true);
 
-%% 3D Plot 
+% 3D Plot 
 figure
 [X,Y] = meshgrid(trans_rate_vec/1000, min_buffer_vec/1000);
 Z = buffer_times';
 mesh(X, Y, Z);
-
 title('Required Buffering Time')
-xlabel('Transmission Rate (KB/s)')
 ylabel('Buffer Amount to Begin Playback (KB)')
 zlabel('Buffering Time (s)')
+if trans_std_dev ~= 0
+    xlabel('Avg Transmission Rate (KB/s)')
+else
+    xlabel('Transmission Rate (KB/s)')
+end
 
 figure
 Z = max_buffers'/1e3;
 mesh(X, Y, Z);
-
 title('Required Decoder Buffer Size')
-xlabel('Transmission Rate (KB/s)')
 ylabel('Buffer Amount to Begin Playback (KB)')
 zlabel('Max Data in Decoder Buffer (KB)')
+if trans_std_dev ~= 0
+    xlabel('Avg Transmission Rate (KB/s)')
+else
+    xlabel('Transmission Rate (KB/s)')
+end
+
