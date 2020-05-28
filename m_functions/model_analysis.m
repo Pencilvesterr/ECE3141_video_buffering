@@ -4,17 +4,21 @@ transmission_rate = 100*1e3;  %(bytes/s)
 dec_min_buffer = 2000*1e3 ;  % (Bytes)
 encoded_data = importdata('../data/jarrasic_park_encoded_mp4_low.txt')';
 
+%% Parameters for model
+% All values in Bytes
 step_size = 1000;
 trans_min = 30000; 
 trans_max = 75000;
 min_buffer_min = 1000;
 min_buffer_max = 150000;
+
+% Creating vector based on model parameters
 trans_rate_vec = trans_min: step_size: trans_max;
 min_buffer_vec = min_buffer_min: step_size: min_buffer_max;
-
 buffer_times = zeros(length(trans_rate_vec), (length(min_buffer_vec)));
 max_buffers = zeros(length(trans_rate_vec), (length(min_buffer_vec)));
 
+% Running the model
 for trans_rate = trans_rate_vec
     trans_i = (trans_rate - trans_min) / step_size + 1;
     for min_buffer = min_buffer_vec
