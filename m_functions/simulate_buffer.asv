@@ -125,8 +125,7 @@ if print
     
     disp('Max Buffer Size: ')
     disp(max_buffer_size)
-    disp('Buffering Time: ')
-    disp(buffering_time)
+    disp('Buffering Time: ' + buffering_time)
 end
 
 

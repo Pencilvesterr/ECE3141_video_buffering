@@ -3,59 +3,51 @@ clc; clear all; close all;
 transmission_rate = 100*1e3;  %(bytes/s)
 dec_min_buffer = 2000*1e3 ;  % (Bytes)
 encoded_data = importdata('../data/jarrasic_park_encoded_mp4_low.txt')';
-[success, buffering_time, max_buffer_size] = simulate_buffer(encoded_data, transmission_rate, dec_min_buffer, false);
 
-buffer_time = zeros(100);
-max_buffer = zeros(100);
+step_size = 1000;
+trans_min = 30000; 
+trans_max = 75000;
+min_buffer_min = 1000;
+min_buffer_max = 150000;
+trans_rate_vec = trans_min: step_size: trans_max;
+min_buffer_vec = min_buffer_min: step_size: min_buffer_max;
 
+buffer_times = zeros(length(trans_rate_vec), (length(min_buffer_vec)));
+max_buffers = zeros(length(trans_rate_vec), (length(min_buffer_vec)));
 
-
-for trans_rate = 1000: 1000: 100000
-    for min_buffer =  1000: 1000: 100000
-        [success, buffering_time, max_buffer_size] = simulate_buffer(encoded_data, trans_rate, min_buffer, false);
+for trans_rate = trans_rate_vec
+    trans_i = (trans_rate - trans_min) / step_size + 1;
+    for min_buffer = min_buffer_vec
+        min_buff_j = (min_buffer - min_buffer_min )/ step_size + 1;
+        [success, buffering_time, max_buffer_size] = simulate_buffer(encoded_data, trans_rate, min_buffer, false, false);
         if success
-            buffer_time(trans_rate/1000, min_buffer/1000) = buffering_time;
-            max_buffer(trans_rate/1000, min_buffer/1000) = max_buffer_size;
+            buffer_times(trans_i, min_buff_j) = buffering_time;
+            max_buffers(trans_i, min_buff_j) = max_buffer_size;
         end
     end
 end
 
-% Plotting buffer time
-% figure 
-% trans_rate = 80;
-% plot(1:100, buffer_time(trans_rate, :));
-% ylabel('Data in Enc Buffer (KB)');
-% xlabel('Min Buffer Time (s)');
-% title('Transmission rate (KB): 80') 
+%% Print single 2D Plot
+plot_tans_rate = 800e3;
+plot_min_buffer = 8e3;
+[success, buffering_time, max_buffer_size] = simulate_buffer(encoded_data, plot_tans_rate, plot_min_buffer, true, true);
 
 %% 3D Plot 
 figure
-[X,Y] = meshgrid(1:100);
-Z = buffer_time;
+[X,Y] = meshgrid(trans_rate_vec/1000, min_buffer_vec/1000);
+Z = buffer_times';
 mesh(X, Y, Z);
 
+title('Required Buffering Time')
 xlabel('Transmission Rate (KB)')
 ylabel('Buffer Size Begin Playback (KB)')
 zlabel('Buffering Time (s)')
 
 figure
-[X,Y] = meshgrid(1:100);
-Z = max_buffer/1e3;
+Z = max_buffers'/1e3;
 mesh(X, Y, Z);
 
-xlabel('Transmission Rate (KB)')
+title('Required Decoder Buffer Size')
+xlabel('Transmission Rate (KB/s)')
 ylabel('Buffer Size Begin Playback (KB)')
 zlabel('Max Data in Decoder Buffer (KB)')
-
-
-if success
-    disp("Successfully complete")
-end
-
-disp("Buffering time: " + buffering_time)
-disp("Max Decoder Buffer: " + floor(max_buffer_size/1e3) + " KB")
-
-
-% TODO: Deal with overflow of buffer
-% TODO: Plot 3D transmission rate vs max_buffer vs buffering_time for cases
-% that succeed
