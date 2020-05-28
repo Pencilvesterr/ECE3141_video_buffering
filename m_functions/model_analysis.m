@@ -43,8 +43,8 @@ Z = buffer_times';
 mesh(X, Y, Z);
 
 title('Required Buffering Time')
-xlabel('Transmission Rate (KB)')
-ylabel('Buffer Size Begin Playback (KB)')
+xlabel('Transmission Rate (KB/s)')
+ylabel('Buffer Amount to Begin Playback (KB)')
 zlabel('Buffering Time (s)')
 
 figure
@@ -53,5 +53,5 @@ mesh(X, Y, Z);
 
 title('Required Decoder Buffer Size')
 xlabel('Transmission Rate (KB/s)')
-ylabel('Buffer Size Begin Playback (KB)')
+ylabel('Buffer Amount to Begin Playback (KB)')
 zlabel('Max Data in Decoder Buffer (KB)')
